@@ -277,6 +277,7 @@ sup,sub{line-height:0}
 .th{position:relative;margin:0;width:96px;height:96px;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:#050a18}
 .th img{width:100%;height:100%;object-fit:cover;display:block}
 .th .x{position:absolute;top:3px;right:3px;width:26px;height:26px;border-radius:50%;border:0;background:rgba(6,11,25,.85);color:#fff;font:700 16px/1 var(--font-body);cursor:pointer}
+.restop{display:flex;justify-content:flex-start;margin-bottom:10px}.shotrow{display:flex;gap:8px;flex-wrap:wrap}.inapp{margin:10px 0;padding:10px 12px;border-radius:12px;background:#fff7e0;border:1px solid #f59e0b;color:#5b3a00;font-size:.92rem;line-height:1.45}
 .shotbtn{position:relative;display:inline-flex;align-items:center;gap:8px;justify-self:start;cursor:pointer}
 .shotbtn input{position:absolute;inset:0;opacity:0;cursor:pointer;font-size:0}
 .tmsg{font-size:13px;color:var(--soft);min-height:18px}
@@ -286,6 +287,7 @@ sup,sub{line-height:0}
 <main class="wrap">
   <!-- ========== TRANG CHỦ ========== -->
   <section id="home">
+    <div class="inapp" id="inapp" hidden><b>Lưu ý:</b> em đang mở bằng ứng dụng khác (Zalo/Facebook…), camera và gửi bài có thể bị chặn. Em bấm dấu <b>⋮</b> hoặc biểu tượng chia sẻ, chọn <b>Mở bằng trình duyệt</b> (Chrome hoặc Safari) rồi làm bài nhé.</div>
     <div class="card">
       <div class="banner">
         <svg class="wings" viewBox="0 0 640 150" aria-hidden="true" focusable="false">
@@ -369,6 +371,7 @@ sup,sub{line-height:0}
       <h2 class="ch" style="padding:0">Tổng hợp kết quả (dành cho giáo viên)</h2>
       <p class="note">Học sinh gửi qua Zalo dòng kết quả có mã bắt đầu bằng <b>BATMATH|</b>. Thầy dán nhiều dòng cùng lúc vào ô dưới (có thể dán cả tin nhắn, hệ thống tự lọc dòng hợp lệ), bấm <b>Nhập</b>, rồi tải file danh sách.</p>
       <textarea class="copybox" id="tIn" aria-label="Dán các dòng kết quả" placeholder="Dán kết quả học sinh gửi tại đây..."></textarea>
+      <div class="acts"><button class="btn sm" id="tPing" type="button">Kiểm tra kết nối Google Sheets</button></div>
       <div class="acts"><button class="btn sm" id="tAdd" type="button">Nhập</button><button class="btn sm ghost" id="tCsv1" type="button">Tải danh sách từng lần (CSV)</button><button class="btn sm ghost" id="tCsv2" type="button">Tải bảng tổng hợp theo học sinh (CSV)</button></div>
       <div class="acts"><button class="btn sm ghost" id="tClear" type="button">Xóa danh sách đã nhập</button><button class="btn sm ghost" id="tBack" type="button">Về trang chủ</button></div>
       <p class="tmsg" id="tMsg" role="status"></p>
@@ -380,6 +383,7 @@ sup,sub{line-height:0}
   <!-- ========== KẾT QUẢ ========== -->
   <section id="result" hidden>
     <div class="card res">
+      <div class="restop"><button class="btn sm ghost" id="btnHome2" type="button">&larr; Thoát về trang chủ</button></div>
       <div class="head"><img id="logoRes" alt="" width="56" height="56"><p class="eyebrow" id="rBrand"></p></div>
       <p class="who2" id="rWho"></p>
       <div class="score gold-text"><span id="rScore">0</span><span class="of" id="rOf"></span></div>
@@ -389,6 +393,8 @@ sup,sub{line-height:0}
       <div class="tlsum" id="tlSum"></div>
       <div class="review-topics" id="rTopics"></div>
       <p class="note" id="rShared"></p>
+      <div class="acts"><button class="btn sm" id="btnDl" type="button">Tải phiếu kết quả về máy</button><button class="btn sm ghost" id="btnShare" type="button">Gửi qua Zalo / ứng dụng khác</button></div>
+      <p class="note" id="dlMsg" role="status">Nếu máy chưa gửi tự động được, em tải phiếu kết quả về rồi gửi Zalo cho thầy và phụ huynh.</p>
       <textarea class="copybox" id="copyBox" readonly hidden aria-label="Kết quả để sao chép"></textarea>
       <div class="acts"><button class="btn sm" id="btnCopy" type="button">Sao chép kết quả</button><button class="btn sm ghost" id="btnCopyTL" type="button">Sao chép bài tự luận</button></div>
       <div class="acts"><button class="btn sm ghost" id="btnRetry" type="button">Thi lần tiếp theo</button><button class="btn sm ghost" id="btnHome" type="button">Về trang chủ</button></div>
@@ -419,7 +425,7 @@ const EXAM = {
   close: "2026-11-07T22:00:00+07:00",
   durationMin: 90,
   maxTries: 3,
-  endpoint: "https://script.google.com/macros/s/AKfycbxpxjiLgvMRHeZ6uudF7WEMv3AcgXri5ZJP71Ejzjuo2v4KY8EkKwI2zt9wh0tYV1G2/exec",
+  endpoint: "https://script.google.com/macros/s/AKfycbxP5zFOE90C1m9kv1iFteoqr8bd2wqbcOy67RItjoigdIN_biHU_C8eI2RKILySeIIR/exec",
   token: "BATMATH-8CT47-2026",
   classes: ["8/2","8/6","8/7","Toán 8CT47(26-27)"],
   shuffleQuestions: true,
@@ -802,7 +808,7 @@ function thumbsHTML(att, key, canDel){
 function paintThumbs(key){
   const el = $('#sh'+key); if(!el || !cur) return;
   el.innerHTML = thumbsHTML(cur, key, true);
-  const full = phOf(cur, key).length >= MAXPH, lab = el.parentNode.querySelector('.shotbtn');
+  const full = phOf(cur, key).length >= MAXPH, lab = el.parentNode.querySelector('.shotrow');
   if(lab) lab.style.display = full ? 'none' : '';
   markNav(key);
 }
@@ -872,7 +878,7 @@ function qHTML(p, it, key, n){
   }
   return '<article class="q" id="q'+key+'"><div class="qn"><span>'+esc(it.lab)+'</span><span class="bai">'+esc(baiLabel(it))+' · '+fmt(it.pts)+' điểm</span></div><div class="qt">'+M(it.q)+'</div>' + figOf(cur.set, +key.split('_')[0], +key.split('_')[1]) +
     '<div class="essay"><textarea class="in" data-t="essay" data-k="'+key+'" rows="5" placeholder="Gõ tóm tắt cách làm (không bắt buộc). Em làm đầy đủ ra vở hoặc giấy." aria-label="Bài làm '+esc(it.lab)+'">'+esc(a || '')+'</textarea>' +
-    '<div class="shots" id="sh'+key+'"></div><label class="btn xs ghost shotbtn">'+ICON_CAM+' Chụp / chọn ảnh bài làm<input type="file" accept="image/*" data-t="photo" data-k="'+key+'"></label>' +
+    '<div class="shots" id="sh'+key+'"></div><div class="shotrow"><label class="btn xs shotbtn">'+ICON_CAM+' Chụp ảnh<input type="file" accept="image/*" capture="environment" data-t="photo" data-k="'+key+'"></label><label class="btn xs ghost shotbtn">Chọn từ thư viện<input type="file" accept="image/*" data-t="photo" data-k="'+key+'"></label></div>' +
     '<small>Em làm ra vở hoặc giấy rồi chụp ảnh đính kèm (tối đa '+MAXPH+' ảnh mỗi câu). Sau khi nộp, em đối chiếu lời giải mẫu và tự chấm điểm.</small></div></article>';
 }
 function renderExam(){
@@ -1125,14 +1131,29 @@ function sendPayload(att, imgs){
 async function postOnce(body){
   const eps = [store.get('ep'), EXAM.endpoint].filter(Boolean).filter((x,i,arr) => arr.indexOf(x) === i);
   const txt = JSON.stringify(body);
+  let serverErr = '';
   for(const ep of eps){
     try{
       const res = await fetch(ep, {method:'POST', body:txt});
       const j = await res.json();
       if(j && j.ok){ store.set('ep', ep); return 'ok'; }
+      if(j && j.err) serverErr = String(j.err);
     }catch(e){}
   }
+  if(serverErr) return 'err:' + serverErr;
   try{ for(const ep of eps) await fetch(ep, {method:'POST', mode:'no-cors', body:txt}); return 'sent'; }catch(e2){ return 'fail'; }
+}
+async function pingEp(){
+  const eps = [EXAM.endpoint].filter(Boolean);
+  if(!eps.length) return 'Chưa cấu hình địa chỉ nhận bài (endpoint).';
+  try{
+    const res = await fetch(eps[0], {method:'POST', body:JSON.stringify({token:EXAM.token, ping:true})});
+    const j = await res.json();
+    if(j && j.ok) return 'KẾT NỐI TỐT. Dữ liệu sẽ được ghi vào bảng tính: ' + (j.sheet || '') + (j.url ? ' (' + j.url + ')' : '');
+    return 'Máy chủ phản hồi nhưng báo lỗi: ' + ((j && j.err) || 'không rõ') + (j && j.err === 'token' ? '. Token trong Apps Script chưa trùng với trang thi.' : '. Thầy mở Apps Script, xem Thực thi (Executions) để biết chi tiết.');
+  }catch(e){
+    return 'Không đọc được phản hồi. Thường do bản triển khai Apps Script chưa đặt “Ai có quyền truy cập: Bất kỳ ai” hoặc chưa triển khai phiên bản mới sau khi sửa mã.';
+  }
 }
 const syncing = {};
 async function syncUp(att){
@@ -1146,14 +1167,14 @@ async function syncUp(att){
     pending.forEach(p => { if(size + p.data.length > 2500000 && part.length){ chunks.push(part); part = []; size = 0; } part.push(p); size += p.data.length; });
     if(part.length) chunks.push(part);
     if(!chunks.length) chunks.push([]);
-    let state = 'ok';
+    let state = 'ok', errMsg = '';
     for(const ch of chunks){
       const r = await postOnce(sendPayload(att, ch));
-      if(r === 'fail'){ state = 'fail'; break; }
+      if(r === 'fail' || r.indexOf('err:') === 0){ state = 'fail'; errMsg = r.indexOf('err:') === 0 ? r.slice(4) : ''; break; }
       ch.forEach(p => { p.up = true; idbDo('readwrite', st => st.put(p)); });
       if(r === 'sent') state = 'sent';
     }
-    att.sync = {state, at:Date.now(), n:pending.length};
+    att.sync = {state, at:Date.now(), n:pending.length, err:errMsg};
   }catch(e){ att.sync = {state:'fail', at:Date.now()}; }
   syncing[sk] = false; saveAtt(); if(viewing === att) paintSend(att);
 }
@@ -1163,10 +1184,58 @@ function paintSend(att){
   const el = $('#rShared'); if(!el) return;
   if(!EXAM.endpoint){ el.textContent = 'Điểm được lưu trên thiết bị này. Em có thể xem lại các lần đã thi ở trang chủ.'; return; }
   const s = att.sync && att.sync.state;
-  if(s === 'ok' || s === 'sent') el.textContent = 'Bài làm và điểm của em đã được gửi cho thầy lúc ' + fmtWhen(att.sync.at) + '. Nếu em tích thêm biểu điểm, hệ thống tự gửi cập nhật.';
+  if(s === 'ok') el.textContent = 'Bài làm và điểm của em đã được gửi cho thầy lúc ' + fmtWhen(att.sync.at) + '. Nếu em tích thêm biểu điểm, hệ thống tự gửi cập nhật.';
+  else if(s === 'sent') el.innerHTML = 'Em đã gửi bài đi lúc ' + fmtWhen(att.sync.at) + ' nhưng máy chưa nhận được xác nhận từ thầy. Em bấm <b>Tải phiếu kết quả</b> bên dưới và gửi Zalo cho chắc nhé. <button class="btn xs" type="button" data-role="resend">Gửi lại</button>';
   else if(s === 'sending') el.textContent = 'Đang gửi bài làm và điểm cho thầy… Em giữ nguyên trang này.';
-  else el.innerHTML = 'Chưa gửi được cho thầy (có thể do mạng). Bài làm vẫn được lưu trên máy em. <button class="btn xs" type="button" data-role="resend">Gửi lại</button>';
+  else el.innerHTML = 'Chưa gửi được cho thầy' + (att.sync && att.sync.err ? ' (lỗi: ' + esc(att.sync.err) + ')' : ' (có thể do mạng)') + '. Bài làm vẫn được lưu trên máy em. <button class="btn xs" type="button" data-role="resend">Gửi lại</button> Em cũng có thể bấm <b>Tải phiếu kết quả</b> bên dưới rồi gửi Zalo cho thầy.';
 }
+
+/* ---------- phiếu kết quả tải về ---------- */
+async function reportHTML(att){
+  await loadPh(att);
+  const g = grade(att), rec = mkRec(att, g), st = att.sess.student, L = 'ABCD';
+  let n = 0;
+  const rows = g.rows.map(r => {
+    if(r.p.type === 'mcq'){
+      const perm = att.sess.perm[r.key], got = r.a == null ? 'Bỏ trống' : 'Chọn ' + L[perm.indexOf(r.a)];
+      return '<tr><td>Câu '+(++n)+'</td><td>Bài '+esc(r.it.bai.join(','))+'</td><td>'+got+' · đáp án '+L[perm.indexOf(r.it.ans)]+'</td><td><b>'+(r.a === r.it.ans ? 'Đúng' : r.a == null ? 'Bỏ trống' : 'Sai')+'</b></td></tr>';
+    }
+    const imgs = (PH[attId(att)] || []).filter(p => p.key === r.key).map(p => '<img src="'+p.data+'" style="max-width:100%;border:1px solid #ccc;border-radius:8px;margin:6px 0">').join('');
+    return '<tr><td>'+esc(r.it.lab)+'</td><td>Bài '+esc(r.it.bai.join(','))+'</td><td>'+(r.a && String(r.a).trim() ? esc(String(r.a).trim()).replace(/\n/g,'<br>') : '<i>(làm ra vở)</i>')+imgs+'</td><td><b>'+(r.state === 'todo' ? 'Chưa tự chấm' : fmt(r.got)+'/'+fmt(r.pts))+'</b></td></tr>';
+  }).join('');
+  return '<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Phiếu kết quả - '+esc(st.name)+'</title>' +
+    '<style>body{font-family:Arial,sans-serif;margin:0;padding:16px;background:#f4f6fb;color:#0d1836}.c{max-width:760px;margin:auto;background:#fff;border-radius:14px;padding:18px;box-shadow:0 2px 10px #0002}h1{font-size:1.15rem;margin:0 0 4px}.s{font-size:2.4rem;font-weight:800;color:#b45309}table{width:100%;border-collapse:collapse;font-size:.92rem}td,th{border:1px solid #d5dbe8;padding:6px 8px;vertical-align:top;text-align:left}pre{white-space:pre-wrap;word-break:break-all;background:#f1f3f8;padding:8px;border-radius:8px;font-size:.78rem}</style></head><body><div class="c">' +
+    '<h1>'+esc(EXAM.brand)+' · PHIẾU KẾT QUẢ</h1><div>'+esc(EXAM.title)+' (mã đề '+esc(EXAM.code)+')</div>' +
+    '<p><b>'+esc(st.name)+'</b> · Lớp '+esc(st.cls)+(st.code ? ' · Mã '+esc(st.code) : '')+'<br>Lần thi '+att.n+'/'+MAXT+' · '+esc(SETS[att.set].name)+'<br>Nộp lúc '+esc(fmtWhen(rec.at))+' · Thời gian làm '+mmss(rec.sec)+'</p>' +
+    '<div class="s">'+fmt(g.total)+' / '+fmt(g.max)+'</div><p>Trắc nghiệm '+fmt(g.tn)+' · Tự luận '+fmt(g.tl)+' (học sinh tự chấm)</p>' +
+    '<table><tr><th>Câu</th><th>Bài</th><th>Bài làm</th><th>Kết quả</th></tr>'+rows+'</table>' +
+    '<p>Mã kết quả (thầy dán vào bảng tổng hợp):</p><pre>'+esc(codeLine(EXAM.code, rec))+'</pre></div></body></html>';
+}
+async function makeReportFile(att){
+  const st = att.sess.student, html = await reportHTML(att);
+  const name = 'KetQua_' + slug(st.name) + '_Lan' + att.n + '.html';
+  return new File([html], name, {type:'text/html'});
+}
+$('#btnDl').addEventListener('click', async () => {
+  if(!viewing) return; const msg = $('#dlMsg');
+  try{
+    const f = await makeReportFile(viewing), url = URL.createObjectURL(f), a = document.createElement('a');
+    a.href = url; a.download = f.name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+    msg.textContent = 'Đã tải file “' + f.name + '” về máy. Em mở thư mục Tải xuống, gửi file này qua Zalo cho thầy và phụ huynh.';
+  }catch(e){ msg.textContent = 'Chưa tải được file. Em bấm “Sao chép kết quả” rồi dán vào Zalo gửi thầy.'; }
+});
+$('#btnShare').addEventListener('click', async () => {
+  if(!viewing) return; const msg = $('#dlMsg');
+  try{
+    const f = await makeReportFile(viewing);
+    if(navigator.canShare && navigator.canShare({files:[f]})){ await navigator.share({files:[f], title:'Phiếu kết quả ' + viewing.sess.student.name}); msg.textContent = 'Em chọn Zalo để gửi cho thầy hoặc phụ huynh.'; return; }
+    if(navigator.share){ await navigator.share({title:'Phiếu kết quả', text:resultText(viewing)}); return; }
+    msg.textContent = 'Máy chưa hỗ trợ chia sẻ trực tiếp. Em bấm “Tải phiếu kết quả về máy” hoặc “Sao chép kết quả” rồi gửi Zalo.';
+  }catch(e){ if(e && e.name !== 'AbortError') msg.textContent = 'Chưa chia sẻ được. Em bấm “Tải phiếu kết quả về máy” rồi gửi Zalo.'; }
+});
+$('#tPing').addEventListener('click', async () => { const m = $('#tMsg'); m.textContent = 'Đang kiểm tra…'; m.textContent = await pingEp(); });
+(function(){ if(/Zalo|FBAN|FBAV|FB_IAB|Instagram|Line\/|MicroMessenger/i.test(navigator.userAgent)){ const b = $('#inapp'); if(b) b.hidden = false; } })();
 
 /* ---------- sao chép kết quả gửi thầy ---------- */
 function resultText(att){
@@ -1201,6 +1270,7 @@ $('#btnCopy').addEventListener('click', () => { if(viewing) copyTo(resultText(vi
 $('#btnCopyTL').addEventListener('click', () => { if(viewing) copyTo(essayText(viewing), 'Đã sao chép bài tự luận.'); });
 $('#btnRetry').addEventListener('click', () => { if(viewing && !$('#btnRetry').disabled) startFromIdentity(viewing.sess.student); });
 $('#btnHome').addEventListener('click', () => { renderHist(); show('home'); });
+$('#btnHome2').addEventListener('click', () => { renderHist(); show('home'); });
 
 /* ---------- biểu mẫu vào thi ---------- */
 function startFromIdentity(id){
