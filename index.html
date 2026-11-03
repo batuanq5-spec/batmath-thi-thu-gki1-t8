@@ -34,6 +34,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 var(--font-bod
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:40}
 .wrap{max-width:680px;margin-inline:auto;display:grid;gap:16px}
 .wrap>section{display:grid;gap:16px;min-width:0}
+[hidden]{display:none!important}
 button,input,select,textarea{font:inherit;color:inherit}
 select option{background:#0d1836;color:#f2f6fd}
 :focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
@@ -1152,7 +1153,10 @@ async function pingEp(){
     if(j && j.ok) return 'KẾT NỐI TỐT. Dữ liệu sẽ được ghi vào bảng tính: ' + (j.sheet || '') + (j.url ? ' (' + j.url + ')' : '');
     return 'Máy chủ phản hồi nhưng báo lỗi: ' + ((j && j.err) || 'không rõ') + (j && j.err === 'token' ? '. Token trong Apps Script chưa trùng với trang thi.' : '. Thầy mở Apps Script, xem Thực thi (Executions) để biết chi tiết.');
   }catch(e){
-    return 'Không đọc được phản hồi. Thường do bản triển khai Apps Script chưa đặt “Ai có quyền truy cập: Bất kỳ ai” hoặc chưa triển khai phiên bản mới sau khi sửa mã.';
+    let g = '';
+    try{ g = (await (await fetch(eps[0])).text()).slice(0, 120); }catch(e2){}
+    if(/BATMath OK/.test(g)) return 'Địa chỉ đúng (' + g + ') nhưng gửi dữ liệu bị chặn. Nhiều khả năng Apps Script chưa được cấp quyền Drive/Sheets. Thầy mở Apps Script, vào mục Thực thi (Executions) xem lần chạy doPost có báo lỗi không, hoặc chạy lại hàm trong trình soạn thảo để cấp quyền rồi triển khai Phiên bản mới.';
+    return 'Không đọc được phản hồi từ địa chỉ nhận bài. Thường do bản triển khai chưa đặt “Ai có quyền truy cập: Bất kỳ ai”, hoặc địa chỉ /exec trong trang thi chưa đúng bản triển khai đang chạy.';
   }
 }
 const syncing = {};
